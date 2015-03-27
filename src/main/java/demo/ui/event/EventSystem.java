@@ -13,7 +13,7 @@ import com.github.wolfie.blackboard.Listener;
 @Scope("session")
 public class EventSystem implements Serializable {
 	private static final long serialVersionUID = 7829012291289167478L;
-	private Blackboard blackboard = new Blackboard();
+	private static final Blackboard blackboard = new Blackboard();
 
     public EventSystem() {
         init();

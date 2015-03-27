@@ -15,6 +15,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import demo.ui.event.EventSystem;
+import demo.ui.event.ReloadEntriesEvent;
 
 @Theme("valo")
 @SpringUI
@@ -29,6 +30,11 @@ public class MyVaadinUI extends UI {
 	@Override
 	protected void init(VaadinRequest request) {
 		initLayout();
+		registerEvents();
+	}
+
+	private void registerEvents() {
+		eventSystem.registerEvent(ReloadEntriesEvent.ReloadEntriesListener.class, ReloadEntriesEvent.class);
 	}
 
 	private void initLayout() {

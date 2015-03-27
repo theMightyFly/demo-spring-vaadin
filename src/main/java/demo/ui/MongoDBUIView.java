@@ -12,6 +12,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -25,6 +26,7 @@ import demo.ui.event.EventSystem;
 import demo.ui.event.ReloadEntriesEvent;
 
 @SpringView(name = MongoDBUIView.VIEW_NAME)
+@UIScope
 public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesEvent.ReloadEntriesListener{
 	public static final String VIEW_NAME = "mongodbui";
 	private static final Log LOG = LogFactory.getLog(MongoDBUIView.class);
@@ -56,7 +58,6 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
 	}
 
 	private void registerEvents() {
-		eventSystem.registerEvent(ReloadEntriesEvent.ReloadEntriesListener.class, ReloadEntriesEvent.class);
 		eventSystem.addListener(this);
     }
 	
