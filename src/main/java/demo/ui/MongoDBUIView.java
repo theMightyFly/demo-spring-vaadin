@@ -1,5 +1,6 @@
 package demo.ui;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -8,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
@@ -16,8 +16,9 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 import demo.data.Customer;
@@ -28,17 +29,18 @@ import demo.ui.event.ReloadEntriesEvent;
 @SpringView(name = MongoDBUIView.VIEW_NAME)
 @UIScope
 public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesEvent.ReloadEntriesListener{
+	private static final long serialVersionUID = -785973470246010003L;
 	public static final String VIEW_NAME = "mongodbui";
 	private static final Log LOG = LogFactory.getLog(MongoDBUIView.class);
 	
-	private Table entityTable;
+	private Grid<Customer> grid;
 	private String selectedId;
 	private Customer selectedCustomer;
 	
 	private Button deleteButton;
 	private Button editButton;
 	
-    @Autowired
+	@Autowired
     private MongoDBContainer mongodbContainer;
     
     @Autowired
@@ -61,28 +63,29 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
 		eventSystem.addListener(this);
     }
 	
-	@SuppressWarnings("serial")
 	private void initLayout(){
 		setMargin(true);
 		setSpacing(true);
 		// vaadin table 
-        entityTable = new Table();
-        entityTable.setContainerDataSource(mongodbContainer);
-        entityTable.setVisibleColumns(MongoDBContainer.PROPERTIES);
-        entityTable.setColumnHeaders(MongoDBContainer.HEADERS);
-        entityTable.setSelectable(true);
-        entityTable.setWidth("100%");
-        entityTable.setHeight("300px");
+        grid = new Grid<Customer>(Customer.class);
+        grid.setDataProvider(mongodbContainer);
+        
+        // set columns
+        grid.setColumnOrder(mongodbContainer.PROPERTIES);
+        
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        
+        grid.setWidth("100%");
+        grid.setHeight("300px");
 
         // table select listener
-        entityTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
-            @Override
-            public void itemClick(ItemClickEvent event) {
-                selectedId = (String) event.getItemId();
-                selectedCustomer =  mongodbContainer.getItem(selectedId).getBean();
-
-               LOG.info("Selected item id {"+ selectedId+"}");
-            }
+        grid.addSelectionListener(event -> {
+        
+        	selectedCustomer = event.getFirstSelectedItem().get();
+            selectedId = selectedCustomer.getId();
+  
+            LOG.info("Selected item id {"+ selectedId+"}");
+        
         });
         // button bar
         final AbstractLayout buttonBar = initButtonBar();
@@ -91,7 +94,7 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
         // edit Form
         editForm.setVisible(false);
         
-        addComponent(entityTable);
+        addComponent(grid);
         addComponent(buttonBar);
         addComponent(editForm);
 	}
@@ -157,9 +160,10 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
         List<Customer> all = service.findAll();
         LOG.info(all);
         // clear table
-        mongodbContainer.removeAllItems();
+        Collection<Customer> items = mongodbContainer.getItems();
+		items.clear();
         // set table data
-        mongodbContainer.addAll(all);
+        items.addAll(all);
     }
 	
 	@Override
@@ -171,7 +175,7 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
 	public void reloadEntries(ReloadEntriesEvent event) {
         LOG.info("Received reload event. Refreshing entry table!");
         initData();
-        entityTable.markAsDirty();
+        grid.getDataProvider().refreshAll();
 	}
 
 }
