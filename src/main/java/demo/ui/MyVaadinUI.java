@@ -60,7 +60,9 @@ public class MyVaadinUI extends UI implements ViewDisplay{
                 DefaultView.VIEW_NAME));		
         navigationBar.addComponent(createNavigationButton("MongoDB View",
                 MongoDBUIView.VIEW_NAME));
-		
+        navigationBar.addComponent(createNavigationButton("Combobox Example View",
+                CityComboboxView.VIEW_NAME));
+        
 		root.addComponent(navigationBar);
 
 		springViewDisplay = new Panel();
