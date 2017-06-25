@@ -19,6 +19,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import demo.data.Customer;
@@ -99,15 +100,30 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
         addComponent(editForm);
 	}
 	
-    @SuppressWarnings("serial")
 	private AbstractLayout initButtonBar() {
         final HorizontalLayout buttonBar = new HorizontalLayout();
 
         buttonBar.setSpacing(true);
 
-        final Button addButton = new Button("Add entry");
-        editButton = new Button("Edit Entry");
-        deleteButton = new Button("Delete entry");
+        final Button addButton = new Button("Add entry", event -> editForm.setVisible(true));
+        editButton = new Button("Edit Entry", event -> editSelectedEntry());
+        ConfirmDialogListener confirmDialogListener = new ConfirmDialogListener() {
+			
+			@Override
+			public void yes() {
+				removeSelectedEntry();
+				
+			}
+			
+			@Override
+			public void no() {
+				// do nothing
+			}
+		};
+        deleteButton = new Button("Delete entry", event -> {
+        	ConfirmDialog confirmDialog = new ConfirmDialog("Delete Entry?", true, confirmDialogListener);
+        	UI.getCurrent().addWindow(confirmDialog);
+        });
 
         buttonBar.addComponent(addButton);
         buttonBar.addComponent(editButton);
@@ -116,25 +132,6 @@ public class MongoDBUIView extends VerticalLayout implements View,ReloadEntriesE
         buttonBar.setComponentAlignment(addButton, Alignment.MIDDLE_LEFT);
         buttonBar.setComponentAlignment(editButton, Alignment.MIDDLE_CENTER);
         buttonBar.setComponentAlignment(deleteButton, Alignment.MIDDLE_RIGHT);
-
-        addButton.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                editForm.setVisible(true);
-            }
-        });
-        editButton.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                editSelectedEntry();
-            }
-        });
-        deleteButton.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                removeSelectedEntry();
-            }
-        });
 
         return buttonBar;
     }
